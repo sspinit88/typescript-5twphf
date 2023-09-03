@@ -14,17 +14,20 @@ function ClassDecorator(options: { nikname: string }): Function {
  * @props target - прототип класса, к которому применяется декоратор;
  * @props { string | symbol } propertyKey - имя поля, к котор применяется декоратор
  */
-const PropertyDecorator = (target: Object, propertyKey: string | symbol) => {
-  let value = target[propertyKey];
-  const defaultValue: string = 'def-secret-xa';
+const PropertyDecorator = (allowlist: string[]) => {
+  return (target: any, memberName: string) => {
+    let currentValue: any = target[memberName];
 
-  if (value == null) {
-    target[propertyKey] = defaultValue;
-  }
-
-  console.log('logProperty:', target, target[propertyKey]);
-
-  return target;
+    Object.defineProperty(target, memberName, {
+      set: (newValue: any) => {
+        if (!allowlist.includes(newValue)) {
+          return (currentValue = allowlist[0]);
+        }
+        currentValue = newValue;
+      },
+      get: () => currentValue,
+    });
+  };
 };
 
 /**
@@ -53,6 +56,7 @@ const MethodDecorator = (
   nikname: 'Guffy',
 })
 class User {
+  @PropertyDecorator(['Claire', 'Oliver'])
   name: string;
   age: number;
   nikname: string;
@@ -71,12 +75,12 @@ class User {
     return `${this.age}${this.name}${secret}`;
   }
 
-  set customNikname(nik: string) {
-    this.nikname = nik;
+  setName(name: string) {
+    this.name = name;
   }
 }
 
-const user = new User('Tom', 25);
+const user = new User('Oliver!', 25);
 console.log('type:', typeof User);
 
 console.log('nikname:', user.nikname);
