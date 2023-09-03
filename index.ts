@@ -1,3 +1,6 @@
+// Import stylesheets
+import './style.css';
+
 /**
  * декоратор класса
  */
